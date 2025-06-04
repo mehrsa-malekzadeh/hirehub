@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeanATS - Dashboard</title>
+    <link rel="stylesheet" href="{% static 'ats/css/styles.css' %}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>LeanATS Dashboard</h1>
+            <button class="btn btn-primary" onclick="window.location.href='{% url 'ats:new_applicant' %}'">
+                Add New Applicant
+            </button>
+        </header>
+
+        <!-- Filters and Search -->
+        <div class="filters-section">
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search by name, email, or tags..." class="search-input">
+                <button onclick="searchApplicants()" class="btn btn-secondary">Search</button>
+            </div>
+            
+            <div class="filter-container">
+                <select id="stageFilter" onchange="filterApplicants()" class="filter-select">
+                    <option value="">All Stages</option>
+                    <option value="Submitted">Submitted</option>
+                    <option value="Under Review">Under Review</option>
+                    <option value="Interview Stage">Interview Stage</option>
+                    <option value="Technical Interview">Technical Interview</option>
+                    <option value="Final Interview">Final Interview</option>
+                    <option value="Offer Extended">Offer Extended</option>
+                    <option value="Hired">Hired</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+                
+                <select id="sourceFilter" onchange="filterApplicants()" class="filter-select">
+                    <option value="">All Sources</option>
+                    <option value="LinkedIn">LinkedIn</option>
+                    <option value="Referral">Referral</option>
+                    <option value="Company Website">Company Website</option>
+                    <option value="Job Board">Job Board</option>
+                    <option value="Other">Other</option>
+                </select>
+                
+                <button onclick="clearFilters()" class="btn btn-secondary">Clear Filters</button>
+            </div>
+        </div>
+
+        <!-- Loading and Error States -->
+        <div id="loadingSpinner" class="loading hidden">Loading applicants...</div>
+        <div id="errorMessage" class="error-message hidden"></div>
+
+        <!-- Applicants Table -->
+        <div class="table-container">
+            <table id="applicantsTable" class="applicants-table">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable('applicant_id')" class="sortable">
+                            ID <span class="sort-arrow">↕</span>
+                        </th>
+                        <th onclick="sortTable('name')" class="sortable">
+                            Name <span class="sort-arrow">↕</span>
+                        </th>
+                        <th onclick="sortTable('email')" class="sortable">
+                            Email <span class="sort-arrow">↕</span>
+                        </th>
+                        <th onclick="sortTable('current_stage')" class="sortable">
+                            Current Stage <span class="sort-arrow">↕</span>
+                        </th>
+                        <th onclick="sortTable('source')" class="sortable">
+                            Source <span class="sort-arrow">↕</span>
+                        </th>
+                        <th onclick="sortTable('last_status_update')" class="sortable">
+                            Last Updated <span class="sort-arrow">↕</span>
+                        </th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="applicantsTableBody">
+                    <!-- Applicant rows will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div id="pagination" class="pagination">
+            <!-- Pagination controls will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <script src="{% static 'ats/js/dashboard.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeanATS - Applicant Details</title>
+    <link rel="stylesheet" href="{% static 'ats/css/styles.css' %}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-nav">
+                <button onclick="window.location.href='{% url 'ats:dashboard' %}'" class="btn btn-secondary">
+                    ← Back to Dashboard
+                </button>
+                <h1 id="applicantName">Applicant Details</h1>
+            </div>
+        </header>
+
+        <!-- Loading and Error States -->
+        <div id="loadingSpinner" class="loading hidden">Loading applicant details...</div>
+        <div id="errorMessage" class="error-message hidden"></div>
+        <div id="successMessage" class="success-message hidden"></div>
+
+        <!-- Applicant Details Form -->
+        <div id="applicantDetails" class="applicant-details hidden">
+            <form id="applicantForm" onsubmit="updateApplicant(event)">
+                <!-- Basic Information -->
+                <div class="section">
+                    <h2>Basic Information</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Applicant ID:</label>
+                            <span id="applicantId" class="readonly-field"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Name:</label>
+                            <span id="applicantNameField" class="readonly-field"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Email:</label>
+                            <span id="applicantEmail" class="readonly-field"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone:</label>
+                            <span id="applicantPhone" class="readonly-field"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Source:</label>
+                            <span id="applicantSource" class="readonly-field"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Created:</label>
+                            <span id="applicantCreated" class="readonly-field"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Update -->
+                <div class="section">
+                    <h2>Status Management</h2>
+                    <div class="form-group">
+                        <label for="currentStage">Current Stage:</label>
+                        <select id="currentStage" name="current_stage" class="form-control" required>
+                            <option value="Submitted">Submitted</option>
+                            <option value="Under Review">Under Review</option>
+                            <option value="Interview Stage">Interview Stage</option>
+                            <option value="Technical Interview">Technical Interview</option>
+                            <option value="Final Interview">Final Interview</option>
+                            <option value="Offer Extended">Offer Extended</option>
+                            <option value="Hired">Hired</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Resume Information -->
+                <div class="section">
+                    <h2>Resume</h2>
+                    <div class="form-group">
+                        <label>Resume File:</label>
+                        <div id="resumeFileContainer">
+                            <span id="noResumeFile" class="readonly-field">No resume file uploaded</span>
+                            <a id="resumeFileLink" href="#" target="_blank" class="btn btn-link hidden">Download Resume</a>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Resume Text:</label>
+                        <div id="resumeTextContainer" class="resume-text-container">
+                            <span id="noResumeText" class="readonly-field">No resume text available</span>
+                            <pre id="resumeText" class="resume-text hidden"></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tags -->
+                <div class="section">
+                    <h2>Tags</h2>
+                    <div class="form-group">
+                        <div id="tagsContainer" class="tags-container">
+                            <!-- Tags will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interview Information -->
+                <div class="section">
+                    <h2>Interview Information</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Interviewers:</label>
+                            <span id="interviewers" class="readonly-field"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Interview Dates:</label>
+                            <span id="interviewDates" class="readonly-field"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comments -->
+                <div class="section">
+                    <h2>Comments & Feedback</h2>
+                    <div class="form-group">
+                        <label for="commentsTA">TA Comments:</label>
+                        <textarea id="commentsTA" name="comments_ta" class="form-control" rows="4" placeholder="Add TA comments..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="commentsInitialCall">Initial Call Comments:</label>
+                        <textarea id="commentsInitialCall" name="comments_initial_call" class="form-control" rows="4" placeholder="Add initial call comments..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="commentsEvaluation">Evaluation Comments:</label>
+                        <textarea id="commentsEvaluation" name="comments_evaluation" class="form-control" rows="4" placeholder="Add evaluation comments..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Final Decision -->
+                <div class="section">
+                    <h2>Final Assessment</h2>
+                    <div class="form-group">
+                        <label>Overall Feedback:</label>
+                        <div id="overallFeedback" class="readonly-field"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Final Decision:</label>
+                        <div id="finalDecision" class="readonly-field"></div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" onclick="window.location.href='{% url 'ats:dashboard' %}'" class="btn btn-secondary">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{% static 'ats/js/applicant_detail.js' %}"></script>
+</body>
+</html>

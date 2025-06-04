@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeanATS - New Applicant</title>
+    <link rel="stylesheet" href="{% static 'ats/css/styles.css' %}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-nav">
+                <button onclick="window.location.href='{% url 'ats:dashboard' %}'" class="btn btn-secondary">
+                    ← Back to Dashboard
+                </button>
+                <h1>Add New Applicant</h1>
+            </div>
+        </header>
+
+        <!-- Error and Success Messages -->
+        <div id="errorMessage" class="error-message hidden"></div>
+        <div id="successMessage" class="success-message hidden"></div>
+
+        <!-- New Applicant Form -->
+        <div class="new-applicant-form">
+            <form id="newApplicantForm" onsubmit="createApplicant(event)">
+                <div class="section">
+                    <h2>Basic Information</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="name">Name *:</label>
+                            <input type="text" id="name" name="name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email *:</label>
+                            <input type="email" id="email" name="email" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone:</label>
+                            <input type="tel" id="phone" name="phone" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="source">Source *:</label>
+                            <select id="source" name="source" class="form-control" required>
+                                <option value="">Select Source</option>
+                                <option value="LinkedIn">LinkedIn</option>
+                                <option value="Referral">Referral</option>
+                                <option value="Company Website">Company Website</option>
+                                <option value="Job Board">Job Board</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Resume</h2>
+                    <div class="form-group">
+                        <label for="resumeFile">Resume File:</label>
+                        <input type="file" id="resumeFile" name="resume_file" class="form-control" accept=".pdf,.doc,.docx">
+                        <small class="form-help">Accepted formats: PDF, DOC, DOCX</small>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Additional Information</h2>
+                    <div class="form-group">
+                        <label for="tags">Tags:</label>
+                        <input type="text" id="tags" name="tags" class="form-control" placeholder="e.g., JavaScript, Senior, Remote">
+                        <small class="form-help">Separate tags with commas</small>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Create Applicant</button>
+                    <button type="button" onclick="window.location.href='{% url 'ats:dashboard' %}'" class="btn btn-secondary">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{% static 'ats/js/new_applicant.js' %}"></script>
+</body>
+</html>
