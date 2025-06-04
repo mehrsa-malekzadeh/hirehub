@@ -1,15 +1,16 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LeanATS - Dashboard</title>
+    <title>HireHub - Dashboard</title>
     <link rel="stylesheet" href="{% static 'ats/css/styles.css' %}">
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1>LeanATS Dashboard</h1>
+            <h1>HireHub Dashboard</h1>
             <button class="btn btn-primary" onclick="window.location.href='{% url 'ats:new_applicant' %}'">
                 Add New Applicant
             </button>
