@@ -10,30 +10,71 @@ const API_BASE_URL = '/api/applicants/';
 
 // Initialize dashboard
 document.addEventListener('DOMContentLoaded', function() {
-    loadApplicants();
+    // Try to load data from Django context first
+    if (typeof initialApplicantsData !== 'undefined' && initialApplicantsData !== null && initialApplicantsData.length > 0) {
+        console.log("Loading data from Django context");
+        applicantsData = initialApplicantsData;
+        filteredData = [...applicantsData];
+
+        // Apply initial filters from server-rendered values
+        if (typeof initialFilters !== 'undefined') {
+            document.getElementById('searchInput').value = initialFilters.search || '';
+            document.getElementById('stageFilter').value = initialFilters.stage || '';
+            document.getElementById('sourceFilter').value = initialFilters.source || '';
+            // Call applyFilters to ensure the view is consistent with initial filter values
+            applyFilters(initialFilters.search);
+        } else {
+            applyFilters(); // Apply default empty filters if initialFilters is not defined
+        }
+
+        renderTable();
+        renderPagination();
+        showLoading(false); // Hide loading spinner as data is already loaded
+    } else {
+        // If no initial data, or it's empty, load from API as fallback or for subsequent loads
+        console.log("Initial data not found or empty, loading from API");
+        loadApplicants();
+    }
+
+    // Event listener for search input Enter key
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchApplicants();
+            }
+        });
+    }
 });
 
-// Load applicants from API
+// Load applicants from API (used as fallback or for refresh functionality if added later)
 async function loadApplicants() {
     showLoading(true);
     hideError();
     
     try {
-        const response = await fetch(API_BASE_URL);
+        const response = await fetch(API_BASE_URL); // Fetches all applicants
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const data = await response.json();
-        applicantsData = data.results || data; // Handle both paginated and non-paginated responses
-        filteredData = [...applicantsData];
+        // Assuming API returns a list directly, or a paginated response with a 'results' field
+        applicantsData = data.results || data;
+        filteredData = [...applicantsData]; // Initialize filteredData with all applicants
         
-        renderTable();
-        renderPagination();
-        
+        // Apply filters that might be set in the UI (e.g., if user types before API loads)
+        // This ensures consistency if API load is slow and user interacts with filters.
+        const currentSearchTerm = document.getElementById('searchInput').value;
+        applyFilters(currentSearchTerm); // This will also call renderTable and renderPagination
+
     } catch (error) {
-        console.error('Error loading applicants:', error);
+        console.error('Error loading applicants from API:', error);
         showError('Failed to load applicants. Please try again.');
+        applicantsData = []; // Ensure data is empty on error
+        filteredData = [];
+        renderTable(); // Render empty table
+        renderPagination(); // Render empty pagination
     } finally {
         showLoading(false);
     }
@@ -246,14 +287,5 @@ function hideError() {
     errorDiv.classList.add('hidden');
 }
 
-// Handle search on Enter key
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                searchApplicants();
-            }
-        });
-    }
-});
+// Note: The DOMContentLoaded listener for search input was moved to the main DOMContentLoaded
+// to avoid re-registering if this script is somehow loaded multiple times or for cleaner organization.

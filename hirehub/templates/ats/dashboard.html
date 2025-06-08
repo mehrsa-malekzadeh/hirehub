@@ -19,30 +19,26 @@
         <!-- Filters and Search -->
         <div class="filters-section">
             <div class="search-container">
-                <input type="text" id="searchInput" placeholder="Search by name, email, or tags..." class="search-input">
+                {# Input value pre-filled by Django context, JS will use this for initial state #}
+                <input type="text" id="searchInput" placeholder="Search by name, email, or tags..." class="search-input" value="{{ current_search_query|default:'' }}">
                 <button onclick="searchApplicants()" class="btn btn-secondary">Search</button>
             </div>
             
             <div class="filter-container">
+                {# Stage Filter Dropdown - options populated by Django, JS handles onchange event #}
                 <select id="stageFilter" onchange="filterApplicants()" class="filter-select">
                     <option value="">All Stages</option>
-                    <option value="Submitted">Submitted</option>
-                    <option value="Under Review">Under Review</option>
-                    <option value="Interview Stage">Interview Stage</option>
-                    <option value="Technical Interview">Technical Interview</option>
-                    <option value="Final Interview">Final Interview</option>
-                    <option value="Offer Extended">Offer Extended</option>
-                    <option value="Hired">Hired</option>
-                    <option value="Rejected">Rejected</option>
+                    {% for choice in stage_choices %}
+                        <option value="{{ choice.0 }}" {% if choice.0 == current_stage_filter %}selected{% endif %}>{{ choice.1 }}</option>
+                    {% endfor %}
                 </select>
                 
+                {# Source Filter Dropdown - options populated by Django, JS handles onchange event #}
                 <select id="sourceFilter" onchange="filterApplicants()" class="filter-select">
                     <option value="">All Sources</option>
-                    <option value="LinkedIn">LinkedIn</option>
-                    <option value="Referral">Referral</option>
-                    <option value="Company Website">Company Website</option>
-                    <option value="Job Board">Job Board</option>
-                    <option value="Other">Other</option>
+                    {% for choice in source_choices %}
+                        <option value="{{ choice.0 }}" {% if choice.0 == current_source_filter %}selected{% endif %}>{{ choice.1 }}</option>
+                    {% endfor %}
                 </select>
                 
                 <button onclick="clearFilters()" class="btn btn-secondary">Clear Filters</button>
@@ -55,7 +51,7 @@
 
         <!-- Applicants Table -->
         <div class="table-container">
-            <table id="applicantsTable" class="applicants-table">
+            <table id="applicantsTable" class="applicants-table"> {# Restored id for JS #}
                 <thead>
                     <tr>
                         <th onclick="sortTable('applicant_id')" class="sortable">
@@ -91,6 +87,14 @@
         </div>
     </div>
 
+    <script>
+        const initialApplicantsData = {{ applicants_json|safe }};
+        const initialFilters = {
+            stage: "{{ current_stage_filter|default:'' }}",
+            source: "{{ current_source_filter|default:'' }}",
+            search: "{{ current_search_query|default:'' }}"
+        };
+    </script>
     <script src="{% static 'ats/js/dashboard.js' %}"></script>
 </body>
 </html>

@@ -18,68 +18,67 @@
             </div>
         </header>
 
-        <!-- Error and Success Messages -->
-        <div id="errorMessage" class="error-message hidden"></div>
-        <div id="successMessage" class="success-message hidden"></div>
-
         <!-- New Applicant Form -->
-        <div class="new-applicant-form">
-            <form id="newApplicantForm" onsubmit="createApplicant(event)">
-                <div class="section">
-                    <h2>Basic Information</h2>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="name">Name *:</label>
-                            <input type="text" id="name" name="name" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email *:</label>
-                            <input type="email" id="email" name="email" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="phone">Phone:</label>
-                            <input type="tel" id="phone" name="phone" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label for="source">Source *:</label>
-                            <select id="source" name="source" class="form-control" required>
-                                <option value="">Select Source</option>
-                                <option value="LinkedIn">LinkedIn</option>
-                                <option value="Referral">Referral</option>
-                                <option value="Company Website">Company Website</option>
-                                <option value="Job Board">Job Board</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
+        {# This form submits data to the 'new_applicant' view via POST.
+           `enctype="multipart/form-data"` is crucial for file uploads (resume). #}
+        <form method="post" action="{% url 'ats:new_applicant' %}" enctype="multipart/form-data" class="new-applicant-form">
+            {# Django's Cross-Site Request Forgery protection token. Required for POST forms. #}
+            {% csrf_token %}
 
-                <div class="section">
-                    <h2>Resume</h2>
+            <div class="section">
+                <h2>Basic Information</h2>
+                <div class="form-grid">
+                    {# Render form fields individually for layout control #}
                     <div class="form-group">
-                        <label for="resumeFile">Resume File:</label>
-                        <input type="file" id="resumeFile" name="resume_file" class="form-control" accept=".pdf,.doc,.docx">
-                        <small class="form-help">Accepted formats: PDF, DOC, DOCX</small>
+                        {{ form.name.label_tag }} {# Renders <label> for the name field #}
+                        {{ form.name }} {# Renders the input widget for name, e.g., <input type="text"> #}
+                        {% if form.name.errors %}<div class="error-message">{{ form.name.errors }}</div>{% endif %} {# Display field-specific errors #}
                     </div>
-                </div>
-
-                <div class="section">
-                    <h2>Additional Information</h2>
                     <div class="form-group">
-                        <label for="tags">Tags:</label>
-                        <input type="text" id="tags" name="tags" class="form-control" placeholder="e.g., JavaScript, Senior, Remote">
-                        <small class="form-help">Separate tags with commas</small>
+                        {{ form.email.label_tag }}
+                        {{ form.email }}
+                        {% if form.email.errors %}<div class="error-message">{{ form.email.errors }}</div>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.phone.label_tag }}
+                        {{ form.phone }}
+                        {% if form.phone.errors %}<div class="error-message">{{ form.phone.errors }}</div>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.source.label_tag }}
+                        {{ form.source }} {# This will be a <select> dropdown due to form widget customization #}
+                        {% if form.source.errors %}<div class="error-message">{{ form.source.errors }}</div>{% endif %}
                     </div>
                 </div>
+            </div>
 
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Create Applicant</button>
-                    <button type="button" onclick="window.location.href='{% url 'ats:dashboard' %}'" class="btn btn-secondary">Cancel</button>
+            <div class="section">
+                <h2>Resume</h2>
+                <div class="form-group">
+                    {{ form.resume_file.label_tag }}
+                    {{ form.resume_file }} {# Renders <input type="file"> #}
+                    {% if form.resume_file.help_text %}<small class="form-help">{{ form.resume_file.help_text }}</small>{% endif %} {# Display help text if provided #}
+                    {% if form.resume_file.errors %}<div class="error-message">{{ form.resume_file.errors }}</div>{% endif %}
                 </div>
-            </form>
-        </div>
+            </div>
+
+            <div class="section">
+                <h2>Additional Information</h2>
+                <div class="form-group">
+                    {{ form.tags.label_tag }}
+                    {{ form.tags }}
+                    {% if form.tags.help_text %}<small class="form-help">{{ form.tags.help_text }}</small>{% endif %}
+                    {% if form.tags.errors %}<div class="error-message">{{ form.tags.errors }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Create Applicant</button>
+                <button type="button" onclick="window.location.href='{% url 'ats:dashboard' %}'" class="btn btn-secondary">Cancel</button>
+            </div>
+        </form>
     </div>
 
-    <script src="{% static 'ats/js/new_applicant.js' %}"></script>
+    <!-- <script src="{% static 'ats/js/new_applicant.js' %}"></script> -->
 </body>
 </html>

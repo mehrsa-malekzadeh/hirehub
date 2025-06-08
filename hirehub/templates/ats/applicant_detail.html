@@ -14,45 +14,49 @@
                 <button onclick="window.location.href='{% url 'ats:dashboard' %}'" class="btn btn-secondary">
                     ← Back to Dashboard
                 </button>
-                <h1 id="applicantName">Applicant Details</h1>
+                {# Display applicant's name in header, or "Applicant Details" if name is not set #}
+                <h1>{{ applicant.name|default:"Applicant Details" }}</h1>
             </div>
         </header>
 
-        <!-- Loading and Error States -->
-        <div id="loadingSpinner" class="loading hidden">Loading applicant details...</div>
-        <div id="errorMessage" class="error-message hidden"></div>
-        <div id="successMessage" class="success-message hidden"></div>
-
         <!-- Applicant Details Form -->
-        <div id="applicantDetails" class="applicant-details hidden">
-            <form id="applicantForm" onsubmit="updateApplicant(event)">
+        {# The main container for applicant details.
+           The form tag is present for structure and potential future enhancements (e.g., AJAX updates).
+           Currently, it doesn't submit in a traditional way as 'onsubmit' was removed.
+           If this were to be a standard HTML form submission for updates,
+           it would need method="post" and an action URL. #}
+        <div class="applicant-details">
+            <form id="applicantForm"> {# Form for structuring content; not a submitting form in this version #}
                 <!-- Basic Information -->
                 <div class="section">
                     <h2>Basic Information</h2>
                     <div class="form-grid">
                         <div class="form-group">
                             <label>Applicant ID:</label>
-                            <span id="applicantId" class="readonly-field"></span>
+                            <span class="readonly-field">{{ applicant.id }}</span>
                         </div>
                         <div class="form-group">
                             <label>Name:</label>
-                            <span id="applicantNameField" class="readonly-field"></span>
+                            <span class="readonly-field">{{ applicant.name }}</span>
                         </div>
                         <div class="form-group">
                             <label>Email:</label>
-                            <span id="applicantEmail" class="readonly-field"></span>
+                            <span class="readonly-field">{{ applicant.email }}</span>
                         </div>
                         <div class="form-group">
                             <label>Phone:</label>
-                            <span id="applicantPhone" class="readonly-field"></span>
+                            {# Use Django's 'default' template filter to show "N/A" if phone is not set #}
+                            <span class="readonly-field">{{ applicant.phone|default:"N/A" }}</span>
                         </div>
                         <div class="form-group">
                             <label>Source:</label>
-                            <span id="applicantSource" class="readonly-field"></span>
+                            {# Use get_xxx_display() method for choice fields to show human-readable value #}
+                            <span class="readonly-field">{{ applicant.get_source_display }}</span>
                         </div>
                         <div class="form-group">
                             <label>Created:</label>
-                            <span id="applicantCreated" class="readonly-field"></span>
+                            {# Use Django's 'date' template filter to format the datetime object #}
+                            <span class="readonly-field">{{ applicant.created_at|date:"Y-m-d H:i" }}</span>
                         </div>
                     </div>
                 </div>
@@ -62,15 +66,13 @@
                     <h2>Status Management</h2>
                     <div class="form-group">
                         <label for="currentStage">Current Stage:</label>
+                        {# Dropdown select for applicant's current stage #}
                         <select id="currentStage" name="current_stage" class="form-control" required>
-                            <option value="Submitted">Submitted</option>
-                            <option value="Under Review">Under Review</option>
-                            <option value="Interview Stage">Interview Stage</option>
-                            <option value="Technical Interview">Technical Interview</option>
-                            <option value="Final Interview">Final Interview</option>
-                            <option value="Offer Extended">Offer Extended</option>
-                            <option value="Hired">Hired</option>
-                            <option value="Rejected">Rejected</option>
+                            {# Iterate over available stage choices (e.g., from Applicant.STAGE_CHOICES) #}
+                            {% for stage_value, stage_display in applicant.STAGE_CHOICES %}
+                                {# Pre-select the option that matches the applicant's current stage #}
+                                <option value="{{ stage_value }}" {% if applicant.current_stage == stage_value %}selected{% endif %}>{{ stage_display }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                 </div>
@@ -80,16 +82,24 @@
                     <h2>Resume</h2>
                     <div class="form-group">
                         <label>Resume File:</label>
-                        <div id="resumeFileContainer">
-                            <span id="noResumeFile" class="readonly-field">No resume file uploaded</span>
-                            <a id="resumeFileLink" href="#" target="_blank" class="btn btn-link hidden">Download Resume</a>
+                        <div>
+                            {# Conditionally display a link to the resume file if it exists #}
+                            {% if applicant.resume_file %}
+                                <a href="{{ applicant.resume_file.url }}" target="_blank" class="btn btn-link">Download Resume</a>
+                            {% else %}
+                                <span class="readonly-field">No resume file uploaded</span>
+                            {% endif %}
                         </div>
                     </div>
                     <div class="form-group">
                         <label>Resume Text:</label>
-                        <div id="resumeTextContainer" class="resume-text-container">
-                            <span id="noResumeText" class="readonly-field">No resume text available</span>
-                            <pre id="resumeText" class="resume-text hidden"></pre>
+                        <div class="resume-text-container">
+                            {# Conditionally display the extracted resume text if available #}
+                            {% if applicant.resume_text %}
+                                <pre class="resume-text">{{ applicant.resume_text }}</pre>
+                            {% else %}
+                                <span class="readonly-field">No resume text available</span>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -98,8 +108,9 @@
                 <div class="section">
                     <h2>Tags</h2>
                     <div class="form-group">
-                        <div id="tagsContainer" class="tags-container">
-                            <!-- Tags will be populated by JavaScript -->
+                        <div class="tags-container">
+                            {# Display applicant's tags, or "No tags" if none are set #}
+                            {{ applicant.tags|default:"No tags" }}
                         </div>
                     </div>
                 </div>
@@ -110,11 +121,11 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label>Interviewers:</label>
-                            <span id="interviewers" class="readonly-field"></span>
+                            <span class="readonly-field">{{ applicant.interviewers|default:"N/A" }}</span>
                         </div>
                         <div class="form-group">
                             <label>Interview Dates:</label>
-                            <span id="interviewDates" class="readonly-field"></span>
+                            <span class="readonly-field">{{ applicant.interview_dates|default:"N/A" }}</span>
                         </div>
                     </div>
                 </div>
@@ -124,15 +135,15 @@
                     <h2>Comments & Feedback</h2>
                     <div class="form-group">
                         <label for="commentsTA">TA Comments:</label>
-                        <textarea id="commentsTA" name="comments_ta" class="form-control" rows="4" placeholder="Add TA comments..."></textarea>
+                        <textarea id="commentsTA" name="comments_ta" class="form-control" rows="4" placeholder="Add TA comments...">{{ applicant.comments_ta|default:"" }}</textarea>
                     </div>
                     <div class="form-group">
                         <label for="commentsInitialCall">Initial Call Comments:</label>
-                        <textarea id="commentsInitialCall" name="comments_initial_call" class="form-control" rows="4" placeholder="Add initial call comments..."></textarea>
+                        <textarea id="commentsInitialCall" name="comments_initial_call" class="form-control" rows="4" placeholder="Add initial call comments...">{{ applicant.comments_initial_call|default:"" }}</textarea>
                     </div>
                     <div class="form-group">
                         <label for="commentsEvaluation">Evaluation Comments:</label>
-                        <textarea id="commentsEvaluation" name="comments_evaluation" class="form-control" rows="4" placeholder="Add evaluation comments..."></textarea>
+                        <textarea id="commentsEvaluation" name="comments_evaluation" class="form-control" rows="4" placeholder="Add evaluation comments...">{{ applicant.comments_evaluation|default:"" }}</textarea>
                     </div>
                 </div>
 
@@ -141,11 +152,11 @@
                     <h2>Final Assessment</h2>
                     <div class="form-group">
                         <label>Overall Feedback:</label>
-                        <div id="overallFeedback" class="readonly-field"></div>
+                        <div class="readonly-field">{{ applicant.overall_feedback|default:"N/A" }}</div>
                     </div>
                     <div class="form-group">
                         <label>Final Decision:</label>
-                        <div id="finalDecision" class="readonly-field"></div>
+                        <div class="readonly-field">{{ applicant.final_decision|default:"N/A" }}</div>
                     </div>
                 </div>
 
@@ -158,6 +169,6 @@
         </div>
     </div>
 
-    <script src="{% static 'ats/js/applicant_detail.js' %}"></script>
+    <!-- <script src="{% static 'ats/js/applicant_detail.js' %}"></script> -->
 </body>
 </html>
