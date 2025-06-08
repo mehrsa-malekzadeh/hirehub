@@ -88,12 +88,22 @@
     </div>
 
     <script>
-        const initialApplicantsData = {{ applicants_json|safe }};
+        // Provide raw JSON data string to be parsed by dashboard.js
+        // Using escapejs to ensure the string is safe to embed in a JavaScript string literal.
+        const rawJsonData = '{{ applicants_json|safe|escapejs }}';
+
+        // Keep initialFilters as it's used by dashboard.js directly
         const initialFilters = {
             stage: "{{ current_stage_filter|default:'' }}",
             source: "{{ current_source_filter|default:'' }}",
             search: "{{ current_search_query|default:'' }}"
         };
+
+        // Temporary inspection script (can be removed after diagnosis)
+        console.log('Raw JSON data string passed to rawJsonData:', rawJsonData);
+        // The old initialApplicantsData definition is removed; dashboard.js will now handle parsing rawJsonData.
+        // The console logs for initialApplicantsData that were here are now effectively covered by
+        // the logs at the beginning of dashboard.js after it attempts to parse rawJsonData.
     </script>
     <script src="{% static 'ats/js/dashboard.js' %}"></script>
 </body>

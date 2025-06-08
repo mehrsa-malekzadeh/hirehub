@@ -1,5 +1,6 @@
 # ats/views.py
 import json
+import logging # Added for logging
 from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
@@ -39,9 +40,17 @@ def dashboard(request):
         )
 
     # Prepare context for the template
+    # Add temporary logging
+    logger = logging.getLogger(__name__)
+    logger.error(f"Number of applicants in queryset: {len(queryset)}")
+
     # Serialize the applicants queryset to JSON for client-side rendering
     serializer = ApplicantSerializer(queryset, many=True)
-    applicants_json = json.dumps(serializer.data, cls=DjangoJSONEncoder)
+    serialized_data = serializer.data # Store serialized data before dumping to json
+    logger.error(f"Serialized data (first 2 items): {serialized_data[:2]}")
+
+    applicants_json = json.dumps(serialized_data, cls=DjangoJSONEncoder)
+    logger.error(f"Applicants JSON (first 300 chars): {applicants_json[:300]}")
 
     context = {
         # 'applicants': queryset, # No longer passing the queryset directly for table rendering

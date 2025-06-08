@@ -10,29 +10,52 @@ const API_BASE_URL = '/api/applicants/';
 
 // Initialize dashboard
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOMContentLoaded event fired.');
+    let localInitialApplicantsData = []; // Use a local variable, then assign to global if valid
+
+    // Safely parse initialApplicantsData from rawJsonData (defined in HTML script tag)
+    if (typeof rawJsonData !== 'undefined' && rawJsonData) {
+        try {
+            localInitialApplicantsData = JSON.parse(rawJsonData);
+        } catch (e) {
+            console.error("Error parsing rawJsonData:", e, "Raw data was:", rawJsonData);
+            // localInitialApplicantsData remains []
+        }
+    }
+
+    console.log('Checking parsed initialApplicantsData within DOMContentLoaded:');
+    // Check localInitialApplicantsData instead of the global one that might not be set yet
+    if (localInitialApplicantsData && typeof localInitialApplicantsData.slice === 'function') { // Check if it's array-like
+        console.log('Parsed initialApplicantsData (first 2 items) in JS:', localInitialApplicantsData.slice(0, 2));
+        console.log('Type of parsed initialApplicantsData in JS:', typeof localInitialApplicantsData);
+        console.log('Is parsed initialApplicantsData an Array in JS?', Array.isArray(localInitialApplicantsData));
+        console.log('Length of parsed initialApplicantsData in JS:', localInitialApplicantsData.length);
+    } else {
+        console.error('Parsed initialApplicantsData is not an array or is undefined in dashboard.js DOMContentLoaded!');
+    }
+
     // Try to load data from Django context first
-    if (typeof initialApplicantsData !== 'undefined' && initialApplicantsData !== null && initialApplicantsData.length > 0) {
-        console.log("Loading data from Django context");
-        applicantsData = initialApplicantsData;
-        filteredData = [...applicantsData];
+    // Use the locally parsed and validated localInitialApplicantsData
+    if (Array.isArray(localInitialApplicantsData) && localInitialApplicantsData.length > 0) {
+        console.log("Loading data from successfully parsed Django context");
+        applicantsData = localInitialApplicantsData; // Assign to global
+        filteredData = [...applicantsData]; // Assign to global
 
         // Apply initial filters from server-rendered values
         if (typeof initialFilters !== 'undefined') {
             document.getElementById('searchInput').value = initialFilters.search || '';
             document.getElementById('stageFilter').value = initialFilters.stage || '';
             document.getElementById('sourceFilter').value = initialFilters.source || '';
-            // Call applyFilters to ensure the view is consistent with initial filter values
             applyFilters(initialFilters.search);
         } else {
-            applyFilters(); // Apply default empty filters if initialFilters is not defined
+            applyFilters();
         }
 
         renderTable();
         renderPagination();
-        showLoading(false); // Hide loading spinner as data is already loaded
+        showLoading(false);
     } else {
-        // If no initial data, or it's empty, load from API as fallback or for subsequent loads
-        console.log("Initial data not found or empty, loading from API");
+        console.log('Parsed initialApplicantsData is empty or invalid. Falling back to loadApplicants().');
         loadApplicants();
     }
 
@@ -59,9 +82,24 @@ async function loadApplicants() {
         }
         
         const data = await response.json();
-        // Assuming API returns a list directly, or a paginated response with a 'results' field
-        applicantsData = data.results || data;
-        filteredData = [...applicantsData]; // Initialize filteredData with all applicants
+        let rawData = []; // Initialize as empty array
+
+        if (data && typeof data === 'object') {
+            if (Array.isArray(data.results)) {
+                rawData = data.results; // Handle DRF paginated response
+            } else if (Array.isArray(data)) {
+                rawData = data; // Handle non-paginated list response
+            } else {
+                // Log if the structure is an object but not as expected
+                console.error('API response is an object but not in expected format (array or {results: array}):', data);
+            }
+        } else {
+            // Log if the response is not even an object (e.g., null, string, number)
+            console.error('API response is not a valid object or array:', data);
+        }
+
+        applicantsData = rawData; // Ensure applicantsData is always at least []
+        filteredData = [...applicantsData]; // Create a new array for filtering
         
         // Apply filters that might be set in the UI (e.g., if user types before API loads)
         // This ensures consistency if API load is slow and user interacts with filters.
@@ -86,6 +124,11 @@ function renderTable() {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const pageData = filteredData.slice(startIndex, endIndex);
+
+    console.log('renderTable called. Page data (first 2 items):', pageData.slice(0,2));
+    console.log('filteredData length:', filteredData.length);
+    console.log('currentPage:', currentPage);
+    console.log('itemsPerPage:', itemsPerPage);
     
     if (pageData.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px;">No applicants found</td></tr>';
