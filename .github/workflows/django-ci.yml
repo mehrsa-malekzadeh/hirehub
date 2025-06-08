@@ -1,0 +1,53 @@
+name: Django CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ['3.10'] # Can specify multiple versions like ['3.8', '3.9', '3.10']
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        # If psycopg2-binary causes issues without libpq-dev on GitHub Actions runner,
+        # we might need: sudo apt-get update && sudo apt-get install -y libpq-dev
+        # However, tests are configured to use SQLite, so psycopg2 might not be strictly needed for the test command.
+        # If it is (e.g. due to manage.py loading settings which try to import psycopg2),
+        # then installing its deps or using a version that doesn't need them for CI is key.
+        # For now, assuming pip install -r requirements.txt is enough as tests use SQLite.
+
+    - name: Run Tests
+      env:
+        # SECRET_KEY, DEBUG, etc., are set in settings.py.
+        # DATABASE_URL is not needed for tests as settings.py switches to SQLite.
+        # Explicitly set CI=true if settings.py uses it to switch to SQLite (as added before)
+        CI: true
+      run: |
+        python hirehub/manage.py test ats
+      # Note: The command `python hirehub/manage.py test ats` assumes the manage.py
+      # is in a subdirectory `hirehub` relative to the repo root.
+      # If manage.py is at `/app/manage.py` in the repo root, then it would be `python manage.py test ats`
+      # Based on previous `ls` output, `manage.py` is at `hirehub/manage.py`.
+      # GitHub Actions checkout puts repo root at current dir, so `hirehub/manage.py` is correct.
+      # The `cd /app/hirehub` was for the sandbox environment.
+      # In GitHub Actions, the CWD is the repo root.
+      # So, the command should be `python hirehub/manage.py test ats`.
+      # My settings.py logic `if 'test' in sys.argv or (os.environ.get('CI') == 'true'):`
+      # makes the `CI: true` env var useful.
