@@ -51,4 +51,3 @@ jobs:
       # So, the command should be `python hirehub/manage.py test ats`.
       # My settings.py logic `if 'test' in sys.argv or (os.environ.get('CI') == 'true'):`
       # makes the `CI: true` env var useful.
-</tbody>
