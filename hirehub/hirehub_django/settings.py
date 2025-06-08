@@ -80,15 +80,28 @@ WSGI_APPLICATION = 'hirehub_django.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('NEON_DATABASE_URL'),
-        conn_max_age=600,
-        ssl_require=True
-    )
-}
-# Ensure the ENGINE is correctly set to 'django.db.backends.postgresql'
-DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql'
+import sys
+
+if 'test' in sys.argv or (os.environ.get('CI') == 'true'):
+    # Use SQLite for testing or CI environments
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3_test', # Or ':memory:' for in-memory
+        }
+    }
+else:
+    # Original database configuration
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get('NEON_DATABASE_URL'),
+            conn_max_age=600,
+            ssl_require=True # Ensure this is appropriate for your Neon setup
+        )
+    }
+    # Ensure the ENGINE is correctly set to 'django.db.backends.postgresql' if not using SQLite
+    if DATABASES['default'].get('ENGINE') != 'django.db.backends.sqlite3':
+        DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql'
 
 
 # Password validation
