@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HireHub - Error{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'ats/css/styles.css' %}">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f8f9fa; /* A light background color */
+            font-family: sans-serif;
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .header {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eeeeee;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #333333;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 20px;
+            font-size: 16px;
+            color: #ffffff;
+            background-color: #007bff; /* Primary button color */
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #0056b3; /* Darker shade on hover */
+        }
+        .error-message-specific {
+            font-size: 18px;
+            color: #dc3545; /* Error color */
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>{% block header_title %}An Error Occurred{% endblock %}</h1>
+        </header>
+
+        <div class="error-message-specific">
+            {% block error_code %}{% endblock %}
+        </div>
+
+        {% block content %}
+        <p>We seem to have encountered an issue. Please try again later.</p>
+        {% endblock %}
+
+        <a href="{% url 'ats:dashboard' %}" class="btn">Back to Dashboard</a>
+    </div>
+</body>
+</html>

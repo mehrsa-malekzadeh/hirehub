@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.core.exceptions import ValidationError
 from django.db.models import Q # Import Q
 from .models import Applicant
@@ -877,3 +877,41 @@ class ApplicantDetailAPIViewTests(TestCase):
         response = self.client.delete(self.detail_url(9999)) # Non-existent ID
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(Applicant.objects.count(), initial_count) # Count should not change
+
+
+class ErrorPageTests(TestCase):
+    @override_settings(DEBUG=False)
+    def test_handler_400_renders_custom_template(self):
+        response = self.client.get(reverse('ats:test_400'))
+        self.assertEqual(response.status_code, 400)
+        self.assertContains(response, "400", status_code=400)
+        self.assertContains(response, "Bad Request", status_code=400)
+        self.assertContains(response, "The server could not understand your request.", status_code=400)
+        self.assertContains(response, "Back to Dashboard", status_code=400)
+
+    @override_settings(DEBUG=False)
+    def test_handler_403_renders_custom_template(self):
+        response = self.client.get(reverse('ats:test_403'))
+        self.assertEqual(response.status_code, 403)
+        self.assertContains(response, "403", status_code=403)
+        self.assertContains(response, "Access Forbidden", status_code=403)
+        self.assertContains(response, "Sorry, you do not have permission to access this page.", status_code=403)
+        self.assertContains(response, "Back to Dashboard", status_code=403)
+
+    @override_settings(DEBUG=False)
+    def test_handler_404_renders_custom_template(self):
+        response = self.client.get(reverse('ats:test_404'))
+        self.assertEqual(response.status_code, 404)
+        self.assertContains(response, "404", status_code=404)
+        self.assertContains(response, "Page Not Found", status_code=404)
+        self.assertContains(response, "The page you are looking for might have been removed", status_code=404)
+        self.assertContains(response, "Back to Dashboard", status_code=404)
+
+    @override_settings(DEBUG=False)
+    def test_handler_500_renders_custom_template(self):
+        response = self.client.get(reverse('ats:test_500'))
+        self.assertEqual(response.status_code, 500)
+        self.assertContains(response, "500", status_code=500)
+        self.assertContains(response, "Internal Server Error", status_code=500)
+        self.assertContains(response, "We are currently experiencing technical difficulties.", status_code=500)
+        self.assertContains(response, "Back to Dashboard", status_code=500)

@@ -14,11 +14,22 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
+from django.conf.urls.static import static
+
+# from ats import views as ats_views # No longer needed for handlers if using string paths
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('ats/', include('ats.urls')),  # Include URLs from the ATS application
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+handler400 = 'ats.views.custom_bad_request'
+handler403 = 'ats.views.custom_permission_denied'
+handler404 = 'ats.views.custom_page_not_found'
+handler500 = 'ats.views.custom_server_error'
