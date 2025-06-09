@@ -17,8 +17,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
+# from ats import views as ats_views # No longer needed for handlers if using string paths
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('ats/', include('ats.urls')),  # Include URLs from the ATS application
 ]
+
+handler400 = 'ats.views.custom_bad_request'
+handler403 = 'ats.views.custom_permission_denied'
+handler404 = 'ats.views.custom_page_not_found'
+handler500 = 'ats.views.custom_server_error'

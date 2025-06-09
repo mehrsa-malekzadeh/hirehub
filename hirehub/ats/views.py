@@ -184,3 +184,47 @@ class ApplicantDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     """
     queryset = Applicant.objects.all()
     serializer_class = ApplicantSerializer
+
+# Custom Error Views
+from django.shortcuts import render # Already imported, but good for clarity if moving
+
+def custom_bad_request(request, exception):
+    return render(request, '400.html', status=400)
+
+def custom_permission_denied(request, exception):
+    return render(request, '403.html', status=403)
+
+def custom_page_not_found(request, exception):
+    return render(request, '404.html', status=404)
+
+def custom_server_error(request): # exception is not passed by default 500 handler
+    return render(request, '500.html', status=500)
+    """
+    API endpoint for retrieving, updating, and deleting a single Applicant.
+
+    GET /api/applicants/{id}/:
+        Retrieves a specific applicant by their ID.
+        Returns 200 OK with applicant data.
+        Returns 404 Not Found if the applicant does not exist.
+
+    PUT /api/applicants/{id}/:
+        Updates an existing applicant.
+        Expects complete applicant data according to ApplicantSerializer.
+        Returns 200 OK on success with updated applicant data.
+        Returns 400 Bad Request on validation errors.
+        Returns 404 Not Found if the applicant does not exist.
+
+    PATCH /api/applicants/{id}/:
+        Partially updates an existing applicant.
+        Expects a subset of applicant data according to ApplicantSerializer.
+        Returns 200 OK on success with updated applicant data.
+        Returns 400 Bad Request on validation errors.
+        Returns 404 Not Found if the applicant does not exist.
+
+    DELETE /api/applicants/{id}/:
+        Deletes an existing applicant.
+        Returns 204 No Content on successful deletion.
+        Returns 404 Not Found if the applicant does not exist.
+    """
+    queryset = Applicant.objects.all()
+    serializer_class = ApplicantSerializer
