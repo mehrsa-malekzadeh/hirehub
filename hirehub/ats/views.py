@@ -5,9 +5,9 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
 from rest_framework import generics
-from .models import Applicant
-from .serializers import ApplicantSerializer
-from .forms import ApplicantForm
+from .models import Applicant, JobPosition
+from .serializers import ApplicantSerializer, JobPositionSerializer
+from .forms import ApplicantForm, JobPositionForm
 
 # Template Views (serve the HTML pages)
 def dashboard(request):
@@ -21,6 +21,7 @@ def dashboard(request):
     stage = request.GET.get('stage')
     source = request.GET.get('source')
     search_query = request.GET.get('search_query')
+    job_position_id = request.GET.get('job_position')
 
     # Apply stage filter if 'stage' parameter is present
     if stage:
@@ -29,6 +30,9 @@ def dashboard(request):
     # Apply source filter if 'source' parameter is present
     if source:
         queryset = queryset.filter(source=source)
+
+    if job_position_id:
+        queryset = queryset.filter(job_position_id=job_position_id)
 
     # Apply search query if 'search_query' parameter is present
     if search_query:
@@ -52,14 +56,17 @@ def dashboard(request):
     applicants_json = json.dumps(serialized_data, cls=DjangoJSONEncoder)
     logger.error(f"Applicants JSON (first 300 chars): {applicants_json[:300]}")
 
+    job_positions = JobPosition.objects.filter(is_active=True)
     context = {
         # 'applicants': queryset, # No longer passing the queryset directly for table rendering
         'applicants_json': applicants_json, # Pass JSON data for JS
         'stage_choices': Applicant.STAGE_CHOICES, # For filter dropdowns
         'source_choices': Applicant.SOURCE_CHOICES, # For filter dropdowns
+        'job_positions': job_positions,
         'current_stage_filter': stage, # To initialize JS filters
         'current_source_filter': source, # To initialize JS filters
         'current_search_query': search_query, # To initialize JS search
+        'current_job_position_filter': job_position_id,
     }
     return render(request, 'ats/dashboard.html', context)
 
@@ -99,6 +106,38 @@ def new_applicant(request):
     }
     return render(request, 'ats/new_applicant.html', context)
 
+
+def job_position_list(request):
+    job_positions = JobPosition.objects.filter(is_active=True)
+    return render(request, 'ats/job_position_list.html', {'job_positions': job_positions})
+
+def job_position_detail(request, pk):
+    job_position = get_object_or_404(JobPosition, pk=pk)
+    applicants = job_position.applicants.all()
+    return render(request, 'ats/job_position_detail.html', {'job_position': job_position, 'applicants': applicants})
+
+def new_job_position(request):
+    if request.method == 'POST':
+        form = JobPositionForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('ats:job_position_list')
+    else:
+        form = JobPositionForm()
+    return render(request, 'ats/new_job_position.html', {'form': form})
+
+def edit_job_position(request, pk):
+    job_position = get_object_or_404(JobPosition, pk=pk)
+    if request.method == 'POST':
+        form = JobPositionForm(request.POST, instance=job_position)
+        if form.is_valid():
+            form.save()
+            return redirect('ats:job_position_detail', pk=pk)
+    else:
+        form = JobPositionForm(instance=job_position)
+    return render(request, 'ats/edit_job_position.html', {'form': form})
+
+
 # API Views (handle data operations)
 class ApplicantListCreateAPIView(generics.ListCreateAPIView):
     """
@@ -130,6 +169,7 @@ class ApplicantListCreateAPIView(generics.ListCreateAPIView):
         search = self.request.query_params.get('search', None)
         stage = self.request.query_params.get('stage', None)
         source = self.request.query_params.get('source', None)
+        job_position_id = self.request.query_params.get('job_position')
         ordering = self.request.query_params.get('ordering', '-created_at') # Default ordering
 
         # Apply search filter if 'search' parameter is present
@@ -148,11 +188,23 @@ class ApplicantListCreateAPIView(generics.ListCreateAPIView):
         # Apply source filter if 'source' parameter is present
         if source:
             queryset = queryset.filter(source=source)
+
+        # Apply job_position filter if 'job_position' parameter is present
+        if job_position_id:
+            queryset = queryset.filter(job_position_id=job_position_id)
         
         # Apply ordering
         queryset = queryset.order_by(ordering)
         
         return queryset
+
+class JobPositionListCreateAPIView(generics.ListCreateAPIView):
+    queryset = JobPosition.objects.all()
+    serializer_class = JobPositionSerializer
+
+class JobPositionDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = JobPosition.objects.all()
+    serializer_class = JobPositionSerializer
 
 class ApplicantDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     """

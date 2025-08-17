@@ -11,9 +11,12 @@
     <div class="container">
         <header class="header">
             <h1>HireHub Dashboard</h1>
-            <button class="btn btn-primary" onclick="window.location.href='{% url 'ats:new_applicant' %}'">
-                Add New Applicant
-            </button>
+            <div>
+                <a href="{% url 'ats:job_position_list' %}" class="btn btn-secondary">Manage Job Positions</a>
+                <button class="btn btn-primary" onclick="window.location.href='{% url 'ats:new_applicant' %}'">
+                    Add New Applicant
+                </button>
+            </div>
         </header>
 
         <!-- Filters and Search -->
@@ -38,6 +41,13 @@
                     <option value="">All Sources</option>
                     {% for choice in source_choices %}
                         <option value="{{ choice.0 }}" {% if choice.0 == current_source_filter %}selected{% endif %}>{{ choice.1 }}</option>
+                    {% endfor %}
+                </select>
+
+                <select id="jobPositionFilter" onchange="filterApplicants()" class="filter-select">
+                    <option value="">All Job Positions</option>
+                    {% for position in job_positions %}
+                        <option value="{{ position.pk }}" {% if position.pk|stringformat:"s" == current_job_position_filter %}selected{% endif %}>{{ position.title }}</option>
                     {% endfor %}
                 </select>
                 
@@ -96,7 +106,8 @@
         const initialFilters = {
             stage: "{{ current_stage_filter|default:'' }}",
             source: "{{ current_source_filter|default:'' }}",
-            search: "{{ current_search_query|default:'' }}"
+            search: "{{ current_search_query|default:'' }}",
+            job_position: "{{ current_job_position_filter|default:'' }}"
         };
 
         // Temporary inspection script (can be removed after diagnosis)
