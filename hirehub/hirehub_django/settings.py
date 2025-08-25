@@ -91,17 +91,25 @@ if 'test' in sys.argv or (os.environ.get('CI') == 'true'):
         }
     }
 else:
-    # Original database configuration
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=os.environ.get('NEON_DATABASE_URL'),
-            conn_max_age=600,
-            ssl_require=True # Ensure this is appropriate for your Neon setup
-        )
-    }
-    # Ensure the ENGINE is correctly set to 'django.db.backends.postgresql' if not using SQLite
-    if DATABASES['default'].get('ENGINE') != 'django.db.backends.sqlite3':
-        DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql'
+    # Try to configure from environment variables
+    db_config = dj_database_url.config(
+        default=os.environ.get('NEON_DATABASE_URL'),
+        conn_max_age=600,
+        ssl_require=True # Ensure this is appropriate for your Neon setup
+    )
+    if db_config:
+        DATABASES = {'default': db_config}
+        # Ensure the ENGINE is correctly set to 'django.db.backends.postgresql' if not using SQLite
+        if DATABASES['default'].get('ENGINE') != 'django.db.backends.sqlite3':
+            DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql'
+    else:
+        # Fallback to SQLite if no database URL is provided
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3_test',
+            }
+        }
 
 
 # Password validation
