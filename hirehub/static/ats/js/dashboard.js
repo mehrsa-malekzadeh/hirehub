@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('searchInput').value = initialFilters.search || '';
             document.getElementById('stageFilter').value = initialFilters.stage || '';
             document.getElementById('sourceFilter').value = initialFilters.source || '';
+            document.getElementById('jobPositionFilter').value = initialFilters.job_position || '';
             applyFilters(initialFilters.search);
         } else {
             applyFilters();
@@ -258,6 +259,7 @@ function filterApplicants() {
 function applyFilters(searchTerm = '') {
     const stageFilter = document.getElementById('stageFilter').value;
     const sourceFilter = document.getElementById('sourceFilter').value;
+    const jobPositionFilter = document.getElementById('jobPositionFilter').value;
     
     filteredData = applicantsData.filter(applicant => {
         const matchesSearch = !searchTerm || 
@@ -267,8 +269,9 @@ function applyFilters(searchTerm = '') {
         
         const matchesStage = !stageFilter || applicant.current_stage === stageFilter;
         const matchesSource = !sourceFilter || applicant.source === sourceFilter;
+        const matchesJobPosition = !jobPositionFilter || (applicant.job_position && applicant.job_position.toString() === jobPositionFilter);
         
-        return matchesSearch && matchesStage && matchesSource;
+        return matchesSearch && matchesStage && matchesSource && matchesJobPosition;
     });
     
     currentPage = 1;
@@ -281,6 +284,7 @@ function clearFilters() {
     document.getElementById('searchInput').value = '';
     document.getElementById('stageFilter').value = '';
     document.getElementById('sourceFilter').value = '';
+    document.getElementById('jobPositionFilter').value = '';
     filteredData = [...applicantsData];
     currentPage = 1;
     renderTable();

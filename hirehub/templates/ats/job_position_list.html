@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Job Positions - HireHub{% endblock %}
+
+{% block content %}
+<div class="container">
+    <header class="header">
+        <h1>Job Positions</h1>
+        <a href="{% url 'ats:new_job_position' %}" class="btn btn-primary">Add New Job Position</a>
+    </header>
+    <div class="table-container">
+        <table class="applicants-table">
+            <thead>
+                <tr>
+                    <th class="sortable">Title <span class="sort-arrow">↕</span></th>
+                    <th class="sortable">Status <span class="sort-arrow">↕</span></th>
+                    <th class="sortable">Created At <span class="sort-arrow">↕</span></th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for job in job_positions %}
+                <tr>
+                    <td><a href="{% url 'ats:job_position_detail' job.pk %}">{{ job.title }}</a></td>
+                    <td>{{ job.is_active|yesno:"Active,Inactive" }}</td>
+                    <td>{{ job.created_at|date:"Y-m-d" }}</td>
+                    <td>
+                        <a href="{% url 'ats:job_position_detail' job.pk %}" class="btn btn-sm btn-info">View</a>
+                        <a href="{% url 'ats:edit_job_position' job.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

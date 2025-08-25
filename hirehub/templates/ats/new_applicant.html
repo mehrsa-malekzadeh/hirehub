@@ -45,6 +45,11 @@
                         {% if form.phone.errors %}<div class="error-message">{{ form.phone.errors }}</div>{% endif %}
                     </div>
                     <div class="form-group">
+                        {{ form.job_position.label_tag }}
+                        {{ form.job_position }}
+                        {% if form.job_position.errors %}<div class="error-message">{{ form.job_position.errors }}</div>{% endif %}
+                    </div>
+                    <div class="form-group">
                         {{ form.source.label_tag }}
                         {{ form.source }} {# This will be a <select> dropdown due to form widget customization #}
                         {% if form.source.errors %}<div class="error-message">{{ form.source.errors }}</div>{% endif %}

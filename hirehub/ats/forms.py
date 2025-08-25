@@ -1,18 +1,30 @@
 # hirehub/ats/forms.py
 from django import forms
-from .models import Applicant
+from .models import Applicant, JobPosition
+
+class JobPositionForm(forms.ModelForm):
+    class Meta:
+        model = JobPosition
+        fields = ['title', 'description', 'requirements', 'is_active']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
+            'requirements': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
 
 class ApplicantForm(forms.ModelForm):
     class Meta:
         model = Applicant
         fields = [
-            'name', 'email', 'phone', 'source',
+            'name', 'email', 'phone', 'job_position', 'source',
             'resume_file', 'tags'
         ]
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'job_position': forms.Select(attrs={'class': 'form-control'}),
             'source': forms.Select(attrs={'class': 'form-control'}),
             'resume_file': forms.FileInput(attrs={'class': 'form-control'}),
             'tags': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., JavaScript, Senior, Remote'}),
@@ -24,22 +36,10 @@ class ApplicantForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # The 'source' field in the Applicant model is a CharField with choices and blank=True.
-        # When Django creates a form field for such a model field, if it's not required (due to blank=True),
-        # it automatically prepends an empty choice, which typically looks like ('', '---------').
-        # This __init__ method customizes this behavior for the 'source' field.
-        # It replaces Django's default empty choice label with "Select Source".
+        # Customize the empty label for the 'source' and 'job_position' dropdowns
+        if 'source' in self.fields:
+            self.fields['source'].choices = [('', 'Select Source')] + list(self.fields['source'].choices)[1:]
 
-        # Convert current choices to a list to safely manipulate them.
-        current_choices_list = list(self.fields['source'].choices)
-
-        if current_choices_list and current_choices_list[0][0] == '':
-            # If the first choice is Django's default empty choice (value is an empty string),
-            # replace it with our custom "Select Source" label while keeping the empty value.
-            self.fields['source'].choices = [('', 'Select Source')] + current_choices_list[1:]
-        else:
-            # If there was no empty choice prepended by Django (e.g., if the field was required,
-            # or if choices were already customized), or if the choices list was empty,
-            # we prepend our "Select Source" option. This case is less likely for a field
-            # with blank=True but ensures robustness.
-            self.fields['source'].choices = [('', 'Select Source')] + current_choices_list
+        if 'job_position' in self.fields:
+            self.fields['job_position'].queryset = JobPosition.objects.filter(is_active=True)
+            self.fields['job_position'].empty_label = "Select Job Position"

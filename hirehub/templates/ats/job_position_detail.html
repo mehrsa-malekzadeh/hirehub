@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}{{ job_position.title }} - HireHub{% endblock %}
+
+{% block content %}
+<div class="container">
+    <header class="header">
+        <h1>{{ job_position.title }}</h1>
+        <a href="{% url 'ats:edit_job_position' job_position.pk %}" class="btn btn-secondary">Edit Job Position</a>
+    </header>
+    <div class="job-details">
+        <p><strong>Status:</strong> {{ job_position.is_active|yesno:"Active,Inactive" }}</p>
+        <p><strong>Description:</strong></p>
+        <p>{{ job_position.description|linebreaks }}</p>
+        <p><strong>Requirements:</strong></p>
+        <p>{{ job_position.requirements|linebreaks }}</p>
+    </div>
+
+    <hr>
+
+    <h2>Applicants for this Position</h2>
+    <div class="table-container">
+        <table class="applicants-table">
+            <thead>
+                <tr>
+                    <th class="sortable">Name <span class="sort-arrow">↕</span></th>
+                    <th class="sortable">Email <span class="sort-arrow">↕</span></th>
+                    <th class="sortable">Stage <span class="sort-arrow">↕</span></th>
+                    <th class="sortable">Applied At <span class="sort-arrow">↕</span></th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for applicant in applicants %}
+                <tr>
+                    <td><a href="{% url 'ats:applicant_detail' applicant.pk %}">{{ applicant.name }}</a></td>
+                    <td>{{ applicant.email }}</td>
+                    <td>{{ applicant.current_stage }}</td>
+                    <td>{{ applicant.created_at|date:"Y-m-d" }}</td>
+                    <td>
+                        <a href="{% url 'ats:applicant_detail' applicant.pk %}" class="btn btn-sm btn-info">View</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">No applicants for this position yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
