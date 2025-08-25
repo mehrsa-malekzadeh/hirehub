@@ -46,7 +46,7 @@ class Command(BaseCommand):
             Applicant.objects.create(
                 name=fake.name(),
                 email=fake.email(),
-                phone=fake.phone_number(),
+                phone=fake.phone_number()[:20],
                 job_position=random.choice(job_positions),
                 current_stage=random.choice([choice[0] for choice in Applicant.STAGE_CHOICES]),
                 source=random.choice([choice[0] for choice in Applicant.SOURCE_CHOICES]),
