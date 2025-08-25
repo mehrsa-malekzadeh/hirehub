@@ -5,11 +5,12 @@ from .models import Applicant, JobPosition
 class JobPositionForm(forms.ModelForm):
     class Meta:
         model = JobPosition
-        fields = ['title', 'description', 'requirements', 'is_active']
+        fields = ['title', 'description', 'requirements', 'tags', 'is_active']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
             'requirements': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
+            'tags': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., Python, Django, Full-Stack'}),
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 

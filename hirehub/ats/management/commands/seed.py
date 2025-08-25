@@ -32,6 +32,7 @@ class Command(BaseCommand):
                 title=fake.job(),
                 description=fake.text(),
                 requirements=fake.text(),
+                tags=', '.join(fake.words(nb=3)),
                 is_active=random.choice([True, False])
             )
 

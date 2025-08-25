@@ -5,6 +5,7 @@ class JobPosition(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     requirements = models.TextField()
+    tags = models.TextField(blank=True, help_text="Comma-separated tags")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
