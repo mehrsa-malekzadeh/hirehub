@@ -1,12 +1,15 @@
 # ats/models.py
 from django.db import models
+from pgvector.django import VectorField
 
 class JobPosition(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     requirements = models.TextField()
+    tags = models.TextField(blank=True, help_text="Comma-separated tags")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    embedding = VectorField(dimensions=384, blank=True, null=True)
 
     def __str__(self):
         return self.title
@@ -46,6 +49,7 @@ class Applicant(models.Model):
     # Resume
     resume_file = models.FileField(upload_to='resumes/', blank=True, null=True)
     resume_text = models.TextField(blank=True)
+    embedding = VectorField(dimensions=384, blank=True, null=True)
     
     # Interview Information
     interviewers = models.TextField(blank=True)
