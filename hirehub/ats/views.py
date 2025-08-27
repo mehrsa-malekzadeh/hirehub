@@ -111,10 +111,30 @@ def job_position_list(request):
     job_positions = JobPosition.objects.filter(is_active=True)
     return render(request, 'ats/job_position_list.html', {'job_positions': job_positions})
 
+from .matching import find_top_applicants_for_job
+from .agent import get_ai_match_summary
+
 def job_position_detail(request, pk):
     job_position = get_object_or_404(JobPosition, pk=pk)
+
+    # Existing logic to get all applicants for the position
     applicants = job_position.applicants.all()
-    return render(request, 'ats/job_position_detail.html', {'job_position': job_position, 'applicants': applicants})
+
+    # New logic to find top matching applicants
+    top_applicants = find_top_applicants_for_job(job_position.id, top_n=5) # Find top 5 for performance
+
+    # Get AI summary for each top applicant
+    # Note: This can be slow as it makes an API call for each applicant.
+    # In a production environment, this should be handled asynchronously.
+    for applicant in top_applicants:
+        applicant.ai_summary = get_ai_match_summary(job_position, applicant)
+
+    context = {
+        'job_position': job_position,
+        'applicants': applicants,
+        'top_applicants': top_applicants,
+    }
+    return render(request, 'ats/job_position_detail.html', context)
 
 def new_job_position(request):
     if request.method == 'POST':

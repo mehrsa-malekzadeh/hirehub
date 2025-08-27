@@ -1,5 +1,5 @@
 from .models import Applicant, JobPosition
-from pgvector.django.expressions import CosineDistance
+from pgvector.django import CosineDistance
 
 def find_top_applicants_for_job(job_id, top_n=10):
     """

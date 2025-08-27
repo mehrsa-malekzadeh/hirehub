@@ -18,7 +18,24 @@
 
     <hr>
 
-    <h2>Applicants for this Position</h2>
+    <h2>Top Matching Applicants (AI-Powered)</h2>
+    <div class="top-applicants-container">
+        {% if top_applicants %}
+            {% for applicant in top_applicants %}
+                <div class="applicant-card">
+                    <h4><a href="{% url 'ats:applicant_detail' applicant.pk %}">{{ applicant.name }}</a></h4>
+                    <p><strong>AI Analysis:</strong></p>
+                    <pre class="ai-summary">{{ applicant.ai_summary }}</pre>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No matching applicants found. Embeddings might still be generating.</p>
+        {% endif %}
+    </div>
+
+    <hr>
+
+    <h2>All Applicants for this Position</h2>
     <div class="table-container">
         <table class="applicants-table">
             <thead>
