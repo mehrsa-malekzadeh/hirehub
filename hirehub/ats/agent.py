@@ -28,10 +28,10 @@ def get_ai_match_summary(job, applicant):
     Now, provide your analysis.
     """
 
-    url = "https://api.atlascloud.ai/v1/chat/completions"
+    url = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {os.getenv('ATLASCLOUD_API_KEY')}" # Use environment variables!
+        "Authorization": f"Bearer {os.environ.get('ATLASCLOUD_API_KEY')}" # Use environment variables!
     }
     data = {
         "model": "openai/gpt-oss-20b",

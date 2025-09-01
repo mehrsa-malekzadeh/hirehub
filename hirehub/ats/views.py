@@ -127,7 +127,8 @@ def job_position_detail(request, pk):
     # Note: This can be slow as it makes an API call for each applicant.
     # In a production environment, this should be handled asynchronously.
     for applicant in top_applicants:
-        applicant.ai_summary = get_ai_match_summary(job_position, applicant)
+        if applicant.ai_summary is None: # Only fetch if not already present   
+            applicant.ai_summary = get_ai_match_summary(job_position, applicant)
 
     context = {
         'job_position': job_position,
